@@ -1,72 +1,76 @@
-﻿using UnityEngine;
-
+﻿using Unity.Profiling;
+using UnityEngine;
 
 namespace RoadArchitect
 {
     public static class Construction
     {
+        private static readonly ProfilerMarker s_CreateNode = new ProfilerMarker("CreateNode");
+
         /// <summary> Creates a node and performs validation checks </summary>
         public static SplineN CreateNode(Road _road, bool _isSpecialEndNode = false, Vector3 _vectorSpecialLoc = default(Vector3), bool _isInterNode = false)
         {
-            Object[] worldNodeCount = GameObject.FindObjectsOfType<SplineN>();
-            GameObject nodeObj = new GameObject("Node" + worldNodeCount.Length.ToString());
-
-            #if UNITY_EDITOR
-            if (!_isInterNode)
+            using (s_CreateNode.Auto())
             {
-                UnityEditor.Undo.RegisterCreatedObjectUndo(nodeObj, "Created node");
-            }
-            #endif
+                Object[] worldNodeCount = Object.FindObjectsOfType<SplineN>();
+                GameObject nodeObj = new GameObject("Node" + worldNodeCount.Length.ToString());
 
-
-            SplineN node = nodeObj.AddComponent<SplineN>();
-
-            if (_isSpecialEndNode)
-            {
-                node.isSpecialEndNode = true;
-                nodeObj.transform.position = _vectorSpecialLoc;
-            }
-            else
-            {
-                nodeObj.transform.position = _road.editorMousePos;
-                //This helps prevent double clicks:
-                int nodeCount = _road.spline.GetNodeCount();
-                for (int index = 0; index < nodeCount; index++)
+#if UNITY_EDITOR
+                if (!_isInterNode)
                 {
-                    if (Vector3.Distance(_road.editorMousePos, _road.spline.nodes[index].pos) < 5f)
-                    {
-                        Object.DestroyImmediate(nodeObj);
-                        return null;
-                    }
+                    UnityEditor.Undo.RegisterCreatedObjectUndo(nodeObj, "Created node");
                 }
-                //End double click prevention
+#endif
+
+                SplineN node = nodeObj.AddComponent<SplineN>();
+
+                if (_isSpecialEndNode)
+                {
+                    node.isSpecialEndNode = true;
+                    nodeObj.transform.position = _vectorSpecialLoc;
+                }
+                else
+                {
+                    nodeObj.transform.position = _road.editorMousePos;
+                    //This helps prevent double clicks:
+                    int nodeCount = _road.spline.GetNodeCount();
+                    for (int index = 0; index < nodeCount; index++)
+                    {
+                        if (Vector3.Distance(_road.editorMousePos, _road.spline.nodes[index].pos) < 5f)
+                        {
+                            Object.DestroyImmediate(nodeObj);
+                            return null;
+                        }
+                    }
+                    //End double click prevention
+                }
+
+                Vector3 xVect = nodeObj.transform.position;
+                if (xVect.y < 0.03f)
+                {
+                    xVect.y = 0.03f;
+                }
+
+                nodeObj.transform.position = xVect;
+
+                nodeObj.transform.parent = _road.splineObject.transform;
+                node.idOnSpline = _road.spline.GetNodeCount() + 1;
+                node.spline = _road.spline;
+
+                //Enforce max road grade:
+                if (_road.isMaxGradeEnabled && !_isSpecialEndNode)
+                {
+                    node.EnsureGradeValidity(-1, true);
+                }
+
+                if (!_isInterNode && !_isSpecialEndNode)
+                {
+                    _road.UpdateRoad();
+                }
+
+                return node;
             }
-
-
-            Vector3 xVect = nodeObj.transform.position;
-            if (xVect.y < 0.03f)
-            {
-                xVect.y = 0.03f;
-            }
-            nodeObj.transform.position = xVect;
-
-            nodeObj.transform.parent = _road.splineObject.transform;
-            node.idOnSpline = _road.spline.GetNodeCount() + 1;
-            node.spline = _road.spline;
-
-            //Enforce max road grade:
-            if (_road.isMaxGradeEnabled && !_isSpecialEndNode)
-            {
-                node.EnsureGradeValidity(-1, true);
-            }
-
-            if (!_isInterNode && !_isSpecialEndNode)
-            {
-                _road.UpdateRoad();
-            }
-            return node;
         }
-
 
         /// <summary> Insert
         /// Detect closest node (if end node, auto select other node)
@@ -76,7 +80,7 @@ namespace RoadArchitect
         public static SplineN InsertNode(Road _road, bool _isForcedLoc = false, Vector3 _forcedLoc = default(Vector3), bool _isPreNode = false, int _insertIndex = -1, bool _isSpecialEndNode = false, bool _isInterNode = false)
         {
             GameObject nodeObj;
-            Object[] worldNodeCount = GameObject.FindObjectsOfType<SplineN>();
+            Object[] worldNodeCount = Object.FindObjectsOfType<SplineN>();
             if (!_isForcedLoc)
             {
                 nodeObj = new GameObject("Node" + worldNodeCount.Length.ToString());
@@ -90,14 +94,12 @@ namespace RoadArchitect
                 nodeObj = new GameObject("Node" + worldNodeCount.Length.ToString());
             }
 
-
-            #if UNITY_EDITOR
+#if UNITY_EDITOR
             if (!_isInterNode)
             {
                 UnityEditor.Undo.RegisterCreatedObjectUndo(nodeObj, "Inserted node");
             }
-            #endif
-
+#endif
 
             if (!_isForcedLoc)
             {
@@ -191,7 +193,7 @@ namespace RoadArchitect
                 node.isBridge = true;
                 node.isIgnore = true;
                 //tNode.bIsBridge_PreNode = bIsPreNode;
-                //tNode.bIsBridge_PostNode = !bIsPreNode;	
+                //tNode.bIsBridge_PostNode = !bIsPreNode;
             }
             node.spline = _road.spline;
             node.idOnSpline = iStart;

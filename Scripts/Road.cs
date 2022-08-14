@@ -1,9 +1,11 @@
 #region "Imports"
+
 using UnityEngine;
 using System.Collections.Generic;
 using RoadArchitect;
-#endregion
+using Unity.Profiling;
 
+#endregion
 
 namespace RoadArchitect
 {
@@ -18,8 +20,8 @@ namespace RoadArchitect
             Cobblestone
         };
 
-
         #region "Vars"
+
         public GameObject MainMeshes;
         public GameObject MeshRoad;
         public GameObject MeshShoR;
@@ -39,97 +41,131 @@ namespace RoadArchitect
         public SplineC spline;
 
         public int MostRecentNodeCount = -1;
+
         [UnityEngine.Serialization.FormerlySerializedAs("GSDSplineObj")]
         public GameObject splineObject;
+
         [UnityEngine.Serialization.FormerlySerializedAs("GSDRS")]
         public RoadSystem roadSystem;
+
         public SplineC[] PiggyBacks = null;
+
         [UnityEngine.Serialization.FormerlySerializedAs("bEditorProgressBar")]
         public bool isEditorProgressBar = false;
+
         //Unique ID
         public string UID;
+
         [SerializeField]
         public List<TerrainHistoryMaker> TerrainHistory;
+
         public string TerrainHistoryByteSize = "";
+
         [System.NonSerialized]
         public bool isUpdatingSpline = false;
 
         //Road editor options:
         [UnityEngine.Serialization.FormerlySerializedAs("opt_LaneWidth")]
         public float laneWidth = 5f;
+
         [UnityEngine.Serialization.FormerlySerializedAs("opt_bShouldersEnabled")]
         public bool isShouldersEnabled = true;
+
         [UnityEngine.Serialization.FormerlySerializedAs("opt_ShoulderWidth")]
         public float shoulderWidth = 3f;
+
         [UnityEngine.Serialization.FormerlySerializedAs("opt_Lanes")]
         public int laneAmount = 2;
+
         [UnityEngine.Serialization.FormerlySerializedAs("opt_RoadDefinition")]
         public float roadDefinition = 5f;
+
         [UnityEngine.Serialization.FormerlySerializedAs("opt_RoadCornerDefinition")]
         public bool roadCornerDefinition = false;
+
         [UnityEngine.Serialization.FormerlySerializedAs("opt_bRoadCuts")]
         public bool isRoadCutsEnabled = true;
+
         [UnityEngine.Serialization.FormerlySerializedAs("opt_bShoulderCuts")]
         public bool isShoulderCutsEnabled = true;
+
         [UnityEngine.Serialization.FormerlySerializedAs("opt_bDynamicCuts")]
         public bool isDynamicCutsEnabled = false;
+
         [UnityEngine.Serialization.FormerlySerializedAs("opt_bMaxGradeEnabled")]
         public bool isMaxGradeEnabled = true;
+
         [UnityEngine.Serialization.FormerlySerializedAs("opt_MaxGrade")]
         public float maxGrade = 0.08f;
+
         [UnityEngine.Serialization.FormerlySerializedAs("opt_UseDefaultMaterials")]
         public bool isUsingDefaultMaterials = true;
+
         [UnityEngine.Serialization.FormerlySerializedAs("opt_AutoUpdateInEditor")]
         public bool isAutoUpdatingInEditor = true;
 
         [UnityEngine.Serialization.FormerlySerializedAs("opt_TerrainSubtract_Match")]
         public float matchTerrainSubtraction = 0.1f;
+
         [UnityEngine.Serialization.FormerlySerializedAs("opt_bGSDRoadRaise")]
         public bool isRaisingRoad = false;
 
         /// <summary> Defines the width of height modification in meters </summary>
         [UnityEngine.Serialization.FormerlySerializedAs("opt_MatchHeightsDistance")]
         public float matchHeightsDistance = 50f;
+
         [UnityEngine.Serialization.FormerlySerializedAs("opt_ClearDetailsDistance")]
         public float clearDetailsDistance = 30f;
+
         [UnityEngine.Serialization.FormerlySerializedAs("opt_ClearDetailsDistanceHeight")]
         public float clearDetailsDistanceHeight = 5f;
+
         [UnityEngine.Serialization.FormerlySerializedAs("opt_ClearTreesDistance")]
         public float clearTreesDistance = 30f;
+
         [UnityEngine.Serialization.FormerlySerializedAs("opt_ClearTreesDistanceHeight")]
         public float clearTreesDistanceHeight = 50f;
 
         [UnityEngine.Serialization.FormerlySerializedAs("opt_HeightModEnabled")]
         public bool isHeightModificationEnabled = true;
+
         [UnityEngine.Serialization.FormerlySerializedAs("opt_DetailModEnabled")]
         public bool isDetailModificationEnabled = true;
+
         [UnityEngine.Serialization.FormerlySerializedAs("opt_TreeModEnabled")]
         public bool isTreeModificationEnabled = true;
 
         [UnityEngine.Serialization.FormerlySerializedAs("opt_SaveTerrainHistoryOnDisk")]
         public bool isSavingTerrainHistoryOnDisk = true;
+
         [UnityEngine.Serialization.FormerlySerializedAs("opt_MagnitudeThreshold")]
         public float magnitudeThreshold = 300f;
+
         [UnityEngine.Serialization.FormerlySerializedAs("opt_GizmosEnabled")]
         public bool isGizmosEnabled = true;
+
         [UnityEngine.Serialization.FormerlySerializedAs("opt_bMultithreading")]
         public bool isUsingMultithreading = true;
+
         [UnityEngine.Serialization.FormerlySerializedAs("opt_bSaveMeshes")]
         public bool isSavingMeshes = false;
+
         [UnityEngine.Serialization.FormerlySerializedAs("opt_bUseMeshColliders")]
         public bool isUsingMeshColliders = true;
+
         [UnityEngine.Serialization.FormerlySerializedAs("opt_bIsStatic")]
         public bool isStatic = false;
+
         [UnityEngine.Serialization.FormerlySerializedAs("opt_bIsLightmapped")]
         public bool isLightmapped = false;
+
         [UnityEngine.Serialization.FormerlySerializedAs("opt_desiredRampHeight")]
         public float desiredRampHeight = 0.35f;
 
-
         [UnityEngine.Serialization.FormerlySerializedAs("opt_tRoadMaterialDropdown")]
         public RoadMaterialDropdownEnum roadMaterialDropdown = RoadMaterialDropdownEnum.Asphalt;
-        public RoadMaterialDropdownEnum tRoadMaterialDropdownOLD = RoadMaterialDropdownEnum.Asphalt;
 
+        public RoadMaterialDropdownEnum tRoadMaterialDropdownOLD = RoadMaterialDropdownEnum.Asphalt;
 
         public Material RoadMaterial1;
         public Material RoadMaterial2;
@@ -150,54 +186,70 @@ namespace RoadArchitect
 
         public PhysicMaterial RoadPhysicMaterial;
         public PhysicMaterial ShoulderPhysicMaterial;
+
         #endregion
 
-
         #region "Road Construction"
+
         #region "Vars"
+
         [System.NonSerialized]
         public Threading.TerrainCalcs TerrainCalcsJob;
+
         [System.NonSerialized]
         public Threading.RoadCalcs1 RoadCalcsJob1;
+
         [System.NonSerialized]
         public Threading.RoadCalcs2 RoadCalcsJob2;
+
         [System.NonSerialized]
         public RoadConstructorBufferMaker RCS;
 
         [UnityEngine.Serialization.FormerlySerializedAs("tName")]
         public string roadName = "";
+
         [UnityEngine.Serialization.FormerlySerializedAs("bProfiling")]
         public bool isProfiling = false;
+
         [UnityEngine.Serialization.FormerlySerializedAs("bSkipStore")]
         public bool isSkippingStore = true;
+
         [System.NonSerialized]
         public float EditorConstructionStartTime = 0f;
+
         [UnityEngine.Serialization.FormerlySerializedAs("bEditorError")]
         public bool isEditorError = false;
+
         [UnityEngine.Serialization.FormerlySerializedAs("tError")]
         public System.Exception exceptionError = null;
-
 
         private int editorTimer = 0;
         private int editorTimerMax = 0;
         private int editorTimerSpline = 0;
         private const int editorTimerSplineMax = 2;
+
         [System.NonSerialized]
         public int editorProgress = 0;
+
         [UnityEngine.Serialization.FormerlySerializedAs("GizmoNodeTimerMax")]
         private const int gizmoNodeTimerMax = 2;
+
         [UnityEngine.Serialization.FormerlySerializedAs("EditorUpdateMe")]
         public bool isUpdateRequired = false;
+
         [UnityEngine.Serialization.FormerlySerializedAs("bTriggerGC")]
         public bool isTriggeringGC = false;
+
         private bool isTriggeredGCExecuting;
         private float triggerGCEnd = 0f;
 
         [System.NonSerialized]
         [UnityEngine.Serialization.FormerlySerializedAs("bEditorCameraMoving")]
         public bool isEditorCameraMoving = false;
+
         [System.NonSerialized]
         public float EditorCameraPos = 0f;
+
         private const float EditorCameraTimeUpdateInterval = 0.015f;
         private float EditorCameraNextMove = 0f;
         private bool isEditorCameraSetup = false;
@@ -206,38 +258,51 @@ namespace RoadArchitect
         private float EditorCameraIncrementDistance = 0f;
         private float EditorCameraIncrementDistance_Full = 0f;
         public float EditorCameraMetersPerSecond = 60f;
+
         [UnityEngine.Serialization.FormerlySerializedAs("bEditorCameraRotate")]
         public bool isEditorCameraRotated = false;
+
         private Vector3 EditorCameraV1 = default(Vector3);
         private Vector3 EditorCameraV2 = default(Vector3);
+
         [System.NonSerialized]
         public Vector3 editorCameraOffset = new Vector3(0f, 5f, 0f);
+
         [System.NonSerialized]
         public Camera editorPlayCamera = null;
+
         private Vector3 editorCameraBadVec = default(Vector3);
 
         public List<Terraforming.TempTerrainData> EditorTTDList;
 
         [UnityEngine.Serialization.FormerlySerializedAs("Editor_bIsConstructing")]
         public bool isEditorConstructing = false;
+
         [UnityEngine.Serialization.FormerlySerializedAs("Editor_bConstructionID")]
         public int editorConstructionID = 0;
+
         [UnityEngine.Serialization.FormerlySerializedAs("Editor_bSelected")]
         public bool isEditorSelected = false;
+
         [UnityEngine.Serialization.FormerlySerializedAs("Editor_MouseTerrainHit")]
         public bool isEditorMouseHittingTerrain = false;
+
         [UnityEngine.Serialization.FormerlySerializedAs("Editor_MousePos")]
         public Vector3 editorMousePos = new Vector3(0f, 0f, 0f);
+
         [UnityEngine.Serialization.FormerlySerializedAs("Color_NodeDefaultColor")]
         public Color defaultNodeColor = new Color(0f, 1f, 1f, 0.75f);
+
         /// <summary> Connection node color </summary>
         public readonly Color Color_NodeConnColor = new Color(0f, 1f, 0f, 0.75f);
+
         /// <summary> The color of the nodes when they are selected </summary>
         public Color selectedColor = Color.yellow;
+
         /// <summary> Color of the node preview when adding a new node </summary>
         public Color newNodePreviewColor = Color.red;
-        #endregion
 
+        #endregion
 
         /// <summary> Make sure unused items are not using memory space in runtime </summary>
         private void CleanRunTime()
@@ -246,23 +311,22 @@ namespace RoadArchitect
             RCS = null;
         }
 
-
         private void OnEnable()
         {
-            #if UNITY_EDITOR
+#if UNITY_EDITOR
             isEditorConstructing = false;
             UnityEditor.EditorApplication.update += delegate
             {
                 EditorUpdate();
             };
-            #if UNITY_2018_1_OR_NEWER
+#if UNITY_2018_1_OR_NEWER
             UnityEditor.EditorApplication.hierarchyChanged += delegate
             {
                 HierarchyWindowChanged();
             };
-            #else
+#else
             UnityEditor.EditorApplication.hierarchyWindowChanged += delegate { HierarchyWindowChanged(); };
-            #endif
+#endif
             if (spline == null || spline.nodes == null)
             {
                 MostRecentNodeCount = 0;
@@ -273,9 +337,8 @@ namespace RoadArchitect
             }
             tRoadMaterialDropdownOLD = roadMaterialDropdown;
             CheckMats();
-            #endif
+#endif
         }
-
 
         public void Awake()
         {
@@ -289,10 +352,9 @@ namespace RoadArchitect
             }
         }
 
-
         private void EditorUpdate()
         {
-            #if UNITY_EDITOR
+#if UNITY_EDITOR
             if (this == null)
             {
                 UnityEditor.EditorApplication.update -= delegate
@@ -303,7 +365,7 @@ namespace RoadArchitect
                 UnityEditor.EditorUtility.ClearProgressBar();
                 return;
             }
-            #endif
+#endif
 
             //Custom garbage collection demands for editor:
             if (isTriggeringGC)
@@ -332,18 +394,18 @@ namespace RoadArchitect
                         if ((Time.realtimeSinceStartup - EditorConstructionStartTime) > 180f)
                         {
                             isEditorConstructing = false;
-                            #if UNITY_EDITOR
+#if UNITY_EDITOR
                             UnityEditor.EditorUtility.ClearProgressBar();
-                            #endif
+#endif
                             Debug.Log("Update shouldn't take longer than 180 seconds. Aborting update.");
                         }
                         editorTimer = 0;
                         if (isEditorError)
                         {
                             isEditorConstructing = false;
-                            #if UNITY_EDITOR
+#if UNITY_EDITOR
                             UnityEditor.EditorUtility.ClearProgressBar();
-                            #endif
+#endif
 
                             isEditorError = false;
                             if (exceptionError != null)
@@ -382,8 +444,7 @@ namespace RoadArchitect
                 RoadUpdateProgressBar();
             }
 
-
-            #if UNITY_EDITOR
+#if UNITY_EDITOR
             if (!Application.isPlaying && isUpdatingSpline)
             {
                 editorTimerSpline += 1;
@@ -396,15 +457,13 @@ namespace RoadArchitect
                 }
             }
 
-
             if (isEditorCameraMoving && EditorCameraNextMove < UnityEditor.EditorApplication.timeSinceStartup)
             {
                 EditorCameraNextMove = (float)UnityEditor.EditorApplication.timeSinceStartup + EditorCameraTimeUpdateInterval;
                 DoEditorCameraLoop();
             }
-            #endif
+#endif
         }
-
 
         public void DoEditorCameraLoop()
         {
@@ -424,13 +483,13 @@ namespace RoadArchitect
                 ChangeEditorCameraMetersPerSec();
             }
 
-            #if UNITY_EDITOR
-            if (!UnityEditor.Selection.Contains(this.transform.gameObject))
+#if UNITY_EDITOR
+            if (!UnityEditor.Selection.Contains(transform.gameObject))
             {
                 QuitEditorCamera();
                 return;
             }
-            #endif
+#endif
 
             //EditorCameraPos_Full+=EditorCameraIncrementDistance_Full;
             //if(EditorCameraPos_Full > spline.distance)
@@ -455,8 +514,7 @@ namespace RoadArchitect
 
             spline.GetSplineValueBoth(EditorCameraPos, out EditorCameraV1, out EditorCameraV2);
 
-
-            #if UNITY_EDITOR
+#if UNITY_EDITOR
             if (Application.isPlaying)
             {
                 if (editorPlayCamera != null)
@@ -485,22 +543,20 @@ namespace RoadArchitect
                 }
                 UnityEditor.SceneView.lastActiveSceneView.Repaint();
             }
-            #endif
+#endif
         }
-
 
         public void EditorCameraSetSingle()
         {
             if (editorPlayCamera == null)
             {
-                Camera[] editorCameras = GameObject.FindObjectsOfType<Camera>();
+                Camera[] editorCameras = FindObjectsOfType<Camera>();
                 if (editorCameras != null && editorCameras.Length == 1)
                 {
                     editorPlayCamera = editorCameras[0];
                 }
             }
         }
-
 
         public void QuitEditorCamera()
         {
@@ -509,43 +565,39 @@ namespace RoadArchitect
             isEditorCameraSetup = false;
         }
 
-
         public void ChangeEditorCameraMetersPerSec()
         {
             EditorCameraIncrementDistance_Full = (EditorCameraMetersPerSecond / 60);
             EditorCameraIncrementDistance = (EditorCameraIncrementDistance_Full / spline.distance);
         }
 
-
         /// <summary> This is called when the hierarchy is changed in the editor </summary>
         private void HierarchyWindowChanged()
         {
-            #if UNITY_EDITOR
-            #if UNITY_2018_1_OR_NEWER
+#if UNITY_EDITOR
+#if UNITY_2018_1_OR_NEWER
             UnityEditor.EditorApplication.hierarchyChanged -= delegate { HierarchyWindowChanged(); };
-            #else
+#else
             UnityEditor.EditorApplication.hierarchyWindowChanged -= delegate { HierarchyWindowChanged(); };
-            #endif
-            #endif
+#endif
+#endif
 
             if (Application.isPlaying || !Application.isEditor)
             {
                 return;
             }
- 
 
-            #if UNITY_EDITOR
-            if(UnityEditor.EditorApplication.isPlayingOrWillChangePlaymode)
+#if UNITY_EDITOR
+            if (UnityEditor.EditorApplication.isPlayingOrWillChangePlaymode)
             {
                 return;
             }
 
-            if(UnityEditor.EditorApplication.isPlaying)
+            if (UnityEditor.EditorApplication.isPlaying)
             {
                 return;
             }
-            #endif
-      
+#endif
 
             int count = 0;
             if (spline != null && spline.nodes != null)
@@ -558,11 +610,10 @@ namespace RoadArchitect
             }
         }
 
-
         /// <summary> Display the progress of the road update </summary>
         private void RoadUpdateProgressBar()
         {
-            #if UNITY_EDITOR
+#if UNITY_EDITOR
             if (isEditorConstructing)
             {
                 UnityEditor.EditorUtility.DisplayProgressBar(
@@ -575,269 +626,267 @@ namespace RoadArchitect
                 isEditorProgressBar = false;
                 UnityEditor.EditorUtility.ClearProgressBar();
             }
-            #endif
+#endif
         }
 
+        private static readonly ProfilerMarker s_UpdateRoad = new ProfilerMarker("UpdateRoad");
 
         /// <summary> Starts the road update </summary>
         public void UpdateRoad(RoadUpdateTypeEnum _updateType = RoadUpdateTypeEnum.Full)
         {
-            if (!roadSystem.isAllowingRoadUpdates)
+            using (s_UpdateRoad.Auto())
             {
-                spline.Setup();
-                isEditorConstructing = false;
-                return;
-            }
-
-            if (isEditorConstructing)
-            {
-                return;
-            }
-
-            RootUtils.SetupUniqueIdentifier(ref UID);
-
-            RootUtils.StartProfiling(this, "UpdateRoadPrelim");
-
-            roadDefinition = Mathf.Clamp(roadDefinition, 1f, 50f);
-            laneWidth = Mathf.Clamp(laneWidth, 0.2f, 500f);
-
-            EditorConstructionStartTime = Time.realtimeSinceStartup;
-            editorTitleString = "Updating " + transform.name + "...";
-            System.GC.Collect();
-
-            if (isSavingTerrainHistoryOnDisk)
-            {
-                LoadTerrainHistory();
-            }
-
-            CheckMats();
-
-            #if UNITY_EDITOR
-            UnityEditor.EditorUtility.ClearProgressBar();
-            #endif
-
-            isProfiling = true;
-            if (isUsingMultithreading)
-            {
-                isProfiling = false;
-            }
-
-            //Set all terrains to height 0:
-            Terraforming.CheckAllTerrainsHeight0();
-
-            editorProgress = 20;
-            isEditorProgressBar = true;
-            if (isEditorConstructing)
-            {
-                AbortJobs();
-
-                isEditorConstructing = false;
-            }
-
-            //In here for intersection patching purposes:
-            int nodeCount = spline.GetNodeCount();
-            SplineN node = null;
-            SplineN node1 = null;
-            SplineN node2 = null;
-
-
-            if (spline.CheckInvalidNodeCount())
-            {
-                spline.Setup();
-                nodeCount = spline.GetNodeCount();
-            }
-
-
-            if (nodeCount > 1)
-            {
-                // Iterate over every node
-                for (int i = 0; i < nodeCount; i++)
+                if (!roadSystem.isAllowingRoadUpdates)
                 {
-                    //try
-                    //{
-                    node = spline.nodes[i];
-                    //}
-                    //catch
-                    //{
-                    //  Editor_bIsConstructing = false;
-                    //	EditorUpdateMe = true;
-                    //	return;	
-                    //}
+                    spline.Setup();
+                    isEditorConstructing = false;
+                    return;
+                }
 
-                    //If node is intersection with an invalid RoadIntersection, mark it as non-intersection. Just-in-case.
-                    if (node.isIntersection && node.intersection == null)
+                if (isEditorConstructing)
+                {
+                    return;
+                }
+
+                RootUtils.SetupUniqueIdentifier(ref UID);
+
+                RootUtils.StartProfiling(this, "UpdateRoadPrelim");
+
+                roadDefinition = Mathf.Clamp(roadDefinition, 1f, 50f);
+                laneWidth = Mathf.Clamp(laneWidth, 0.2f, 500f);
+
+                EditorConstructionStartTime = Time.realtimeSinceStartup;
+                editorTitleString = "Updating " + transform.name + "...";
+                System.GC.Collect();
+
+                if (isSavingTerrainHistoryOnDisk)
+                {
+                    LoadTerrainHistory();
+                }
+
+                CheckMats();
+
+#if UNITY_EDITOR
+                UnityEditor.EditorUtility.ClearProgressBar();
+#endif
+
+                isProfiling = true;
+                if (isUsingMultithreading)
+                {
+                    isProfiling = false;
+                }
+
+                //Set all terrains to height 0:
+                Terraforming.CheckAllTerrainsHeight0();
+
+                editorProgress = 20;
+                isEditorProgressBar = true;
+                if (isEditorConstructing)
+                {
+                    AbortJobs();
+
+                    isEditorConstructing = false;
+                }
+
+                //In here for intersection patching purposes:
+                int nodeCount = spline.GetNodeCount();
+                SplineN node = null;
+                SplineN node1 = null;
+                SplineN node2 = null;
+
+                if (spline.CheckInvalidNodeCount())
+                {
+                    spline.Setup();
+                    nodeCount = spline.GetNodeCount();
+                }
+
+                if (nodeCount > 1)
+                {
+                    // Iterate over every node
+                    for (int i = 0; i < nodeCount; i++)
                     {
-                        node.isIntersection = false;
-                        node.intersectionOtherNodeID = -1;
-                        node.intersectionOtherNode = null;
-                    }
+                        //try
+                        //{
+                        node = spline.nodes[i];
+                        //}
+                        //catch
+                        //{
+                        //  Editor_bIsConstructing = false;
+                        //	EditorUpdateMe = true;
+                        //	return;
+                        //}
 
-
-                    //If node is intersection, re-setup:
-                    if (node.isIntersection && node.intersection != null)
-                    {
-                        node1 = node.intersection.node1;
-                        node2 = node.intersection.node2;
-                        node.intersection.Setup(node1, node2);
-                        node.intersection.DeleteRelevantChildren(node, node.spline.road.transform.name);
-
-                        //If primary node on intersection, do more re-setup:
-                        if (node.intersection.node1 == node)
+                        //If node is intersection with an invalid RoadIntersection, mark it as non-intersection. Just-in-case.
+                        if (node.isIntersection && node.intersection == null)
                         {
-                            node.intersection.lanesAmount = laneAmount;
-                            node.intersection.name = node.intersection.transform.name;
+                            node.isIntersection = false;
+                            node.intersectionOtherNodeID = -1;
+                            node.intersectionOtherNode = null;
                         }
-                        //Setup construction objects:
-                        node.intersection.node1.intersectionConstruction = new iConstructionMaker();
-                        node.intersection.node2.intersectionConstruction = new iConstructionMaker();
-                    }
 
+                        //If node is intersection, re-setup:
+                        if (node.isIntersection && node.intersection != null)
+                        {
+                            node1 = node.intersection.node1;
+                            node2 = node.intersection.node2;
+                            node.intersection.Setup(node1, node2);
+                            node.intersection.DeleteRelevantChildren(node, node.spline.road.transform.name);
 
-                    //Store materials and physical materials for road and or shoulder cuts on each node, if necessary:
-                    node.StoreCuts();
-                }
-            }
+                            //If primary node on intersection, do more re-setup:
+                            if (node.intersection.node1 == node)
+                            {
+                                node.intersection.lanesAmount = laneAmount;
+                                node.intersection.name = node.intersection.transform.name;
+                            }
 
+                            //Setup construction objects:
+                            node.intersection.node1.intersectionConstruction = new iConstructionMaker();
+                            node.intersection.node2.intersectionConstruction = new iConstructionMaker();
+                        }
 
-            name = transform.name;
-
-            spline.RoadWidth = RoadWidth();
-            //RootUtils.StartProfiling(this, "SplineSetup");
-            spline.Setup();
-            //RootUtils.EndProfiling(this);
-            nodeCount = spline.GetNodeCount();
-
-            if (spline == null || spline.nodes == null)
-            {
-                MostRecentNodeCount = 0;
-            }
-            else
-            {
-                MostRecentNodeCount = spline.GetNodeCount();
-            }
-
-
-            if (isUsingDefaultMaterials)
-            {
-                SetDefaultMats();
-
-                if (DetectInvalidDefaultMatsForUndo())
-                {
-                    SetAllCutsToCurrentMaterials();
-                }
-            }
-
-            //Hiding in hierarchy:
-            for (int i = 0; i < nodeCount; i++)
-            {
-                node = spline.nodes[i];
-                if (node != null)
-                {
-                    if (node.isIntersection || node.isSpecialEndNode)
-                    {
-                        node.ToggleHideFlags(true);
-                    }
-                    else
-                    {
-                        node.ToggleHideFlags(false);
+                        //Store materials and physical materials for road and or shoulder cuts on each node, if necessary:
+                        node.StoreCuts();
                     }
                 }
-            }
 
+                name = transform.name;
 
-            // Delete mainMeshes of this road
-            int childCount = transform.childCount;
-            GameObject mainMeshes = null;
-            for (int i = 0; i < childCount; i++)
-            {
-                if (transform.GetChild(i).transform.name.ToLower().Contains("mainmeshes"))
+                spline.RoadWidth = RoadWidth();
+                //RootUtils.StartProfiling(this, "SplineSetup");
+                spline.Setup();
+                //RootUtils.EndProfiling(this);
+                nodeCount = spline.GetNodeCount();
+
+                if (spline == null || spline.nodes == null)
                 {
-                    mainMeshes = transform.GetChild(i).transform.gameObject;
-                    Object.DestroyImmediate(mainMeshes);
-                }
-            }
-
-
-            if (nodeCount < 2)
-            {
-                //Delete old objs and return:
-                Object.DestroyImmediate(MainMeshes);
-                Object.DestroyImmediate(MeshRoad);
-                Object.DestroyImmediate(MeshShoR);
-                Object.DestroyImmediate(MeshShoL);
-                Object.DestroyImmediate(MeshiLanes);
-                Object.DestroyImmediate(MeshiLanes0);
-                Object.DestroyImmediate(MeshiLanes1);
-                Object.DestroyImmediate(MeshiLanes2);
-                Object.DestroyImmediate(MeshiLanes3);
-                Object.DestroyImmediate(MeshiMainPlates);
-                Object.DestroyImmediate(MeshiMarkerPlates);
-                RootUtils.EndProfiling(this);
-                return;
-            }
-
-
-            spline.HeightHistory = new List<KeyValuePair<float, float>>();
-            if (roadSystem == null)
-            {
-                roadSystem = transform.parent.GetComponent<RoadSystem>();
-            }
-            //Compatibility update.
-            if (isUsingMultithreading)
-            {
-                isEditorConstructing = true;
-            }
-            else
-            {
-                isEditorConstructing = false;
-            }
-            editorConstructionID = 0;
-
-
-            //Check if road takes place on only 1 terrain:
-            Terrain terrain = RoadUtility.GetTerrain(spline.nodes[0].pos);
-            bool isSameTerrain = true;
-            for (int i = 1; i < nodeCount; i++)
-            {
-                if (terrain != RoadUtility.GetTerrain(spline.nodes[0].pos))
-                {
-                    isSameTerrain = false;
-                    break;
-                }
-            }
-
-            RCS = new RoadConstructorBufferMaker(this, _updateType);
-
-            if (isSameTerrain)
-            {
-                RCS.tTerrain = terrain;
-            }
-            else
-            {
-                RCS.tTerrain = null;
-            }
-            terrain = null;
-
-            RootUtils.EndProfiling(this);
-            if (isUsingMultithreading)
-            {
-                if (RCS.isTerrainOn || TerrainHistory == null)
-                {
-                    Terraforming.ProcessRoadTerrainHook1(spline, this);
+                    MostRecentNodeCount = 0;
                 }
                 else
                 {
-                    ConstructRoad2();
+                    MostRecentNodeCount = spline.GetNodeCount();
                 }
-            }
-            else
-            {
-                UpdateRoadNoMultiThreading();
+
+                if (isUsingDefaultMaterials)
+                {
+                    SetDefaultMats();
+
+                    if (DetectInvalidDefaultMatsForUndo())
+                    {
+                        SetAllCutsToCurrentMaterials();
+                    }
+                }
+
+                //Hiding in hierarchy:
+                for (int i = 0; i < nodeCount; i++)
+                {
+                    node = spline.nodes[i];
+                    if (node != null)
+                    {
+                        if (node.isIntersection || node.isSpecialEndNode)
+                        {
+                            node.ToggleHideFlags(true);
+                        }
+                        else
+                        {
+                            node.ToggleHideFlags(false);
+                        }
+                    }
+                }
+
+                // Delete mainMeshes of this road
+                int childCount = transform.childCount;
+                GameObject mainMeshes = null;
+                for (int i = 0; i < childCount; i++)
+                {
+                    if (transform.GetChild(i).transform.name.ToLower().Contains("mainmeshes"))
+                    {
+                        mainMeshes = transform.GetChild(i).transform.gameObject;
+                        DestroyImmediate(mainMeshes);
+                    }
+                }
+
+                if (nodeCount < 2)
+                {
+                    //Delete old objs and return:
+                    DestroyImmediate(MainMeshes);
+                    DestroyImmediate(MeshRoad);
+                    DestroyImmediate(MeshShoR);
+                    DestroyImmediate(MeshShoL);
+                    DestroyImmediate(MeshiLanes);
+                    DestroyImmediate(MeshiLanes0);
+                    DestroyImmediate(MeshiLanes1);
+                    DestroyImmediate(MeshiLanes2);
+                    DestroyImmediate(MeshiLanes3);
+                    DestroyImmediate(MeshiMainPlates);
+                    DestroyImmediate(MeshiMarkerPlates);
+                    RootUtils.EndProfiling(this);
+                    return;
+                }
+
+                spline.HeightHistory = new List<KeyValuePair<float, float>>();
+                if (roadSystem == null)
+                {
+                    roadSystem = transform.parent.GetComponent<RoadSystem>();
+                }
+
+                //Compatibility update.
+                if (isUsingMultithreading)
+                {
+                    isEditorConstructing = true;
+                }
+                else
+                {
+                    isEditorConstructing = false;
+                }
+
+                editorConstructionID = 0;
+
+                //Check if road takes place on only 1 terrain:
+                Terrain terrain = RoadUtility.GetTerrain(spline.nodes[0].pos);
+                bool isSameTerrain = true;
+                for (int i = 1; i < nodeCount; i++)
+                {
+                    if (terrain != RoadUtility.GetTerrain(spline.nodes[0].pos))
+                    {
+                        isSameTerrain = false;
+                        break;
+                    }
+                }
+
+                RCS = new RoadConstructorBufferMaker(this, _updateType);
+
+                if (isSameTerrain)
+                {
+                    RCS.tTerrain = terrain;
+                }
+                else
+                {
+                    RCS.tTerrain = null;
+                }
+
+                terrain = null;
+
+                RootUtils.EndProfiling(this);
+                if (isUsingMultithreading)
+                {
+                    if (RCS.isTerrainOn || TerrainHistory == null)
+                    {
+                        Terraforming.ProcessRoadTerrainHook1(spline, this);
+                    }
+                    else
+                    {
+                        ConstructRoad2();
+                    }
+                }
+                else
+                {
+                    UpdateRoadNoMultiThreading();
+                }
             }
         }
 
-
         #region "Terrain history"
+
         public void StoreTerrainHistory(bool _isDiskOnly = false)
         {
             if (!_isDiskOnly)
@@ -872,7 +921,6 @@ namespace RoadArchitect
             }
         }
 
-
         public void ResetTerrainHistory()
         {
             Road tRoad = this;
@@ -885,7 +933,6 @@ namespace RoadArchitect
                 RoadUtility.ResetTerrainHistory(ref tRoad);
             }
         }
-
 
         /// <summary> Loads terrain history from disk </summary>
         public void LoadTerrainHistory(bool _isForced = false)
@@ -904,11 +951,13 @@ namespace RoadArchitect
                 TerrainHistoryUtility.DeleteTerrainHistory(this);
             }
         }
+
         #endregion
 
-
         #region "Construction process"
+
         #region "No multithread"
+
         private void UpdateRoadNoMultiThreading()
         {
             if (isHeightModificationEnabled || isDetailModificationEnabled || isTreeModificationEnabled)
@@ -952,8 +1001,8 @@ namespace RoadArchitect
             RootUtils.EndProfiling(this);
             ConstructionCleanup();
         }
-        #endregion
 
+        #endregion
 
         /// <summary> Stores terrain history and nulls TerrainCalcsJob</summary>
         private void ConstructRoad2()
@@ -983,7 +1032,6 @@ namespace RoadArchitect
             RoadCalcsJob1.Start();
         }
 
-
         private void ConstructRoad3()
         {
             editorProgress = 84;
@@ -1000,14 +1048,13 @@ namespace RoadArchitect
             editorProgress = 98;
         }
 
-
         private void ConstructRoad4()
         {
             RCS.MeshSetup2();
             ConstructionCleanup();
         }
-        #endregion
 
+        #endregion
 
         private void AbortJobs()
         {
@@ -1027,7 +1074,6 @@ namespace RoadArchitect
                 RoadCalcsJob2 = null;
             }
         }
-
 
         private void ConstructionCleanup()
         {
@@ -1063,19 +1109,18 @@ namespace RoadArchitect
                 RCS = null;
             }
 
-
-            #if UNITY_EDITOR
+#if UNITY_EDITOR
             if (isSavingMeshes)
             {
                 UnityEditor.AssetDatabase.SaveAssets();
             }
-            #endif
+#endif
 
             isEditorProgressBar = false;
 
-            #if UNITY_EDITOR
+#if UNITY_EDITOR
             UnityEditor.EditorUtility.ClearProgressBar();
-            #endif
+#endif
 
             //Make sure terrain history out of memory if necessary (redudant but keep):
             if (isSavingTerrainHistoryOnDisk && TerrainHistory != null)
@@ -1129,15 +1174,15 @@ namespace RoadArchitect
             }
         }
 
-
         public void SetEditorTerrainCalcs(ref List<Terraforming.TempTerrainData> _tddList)
         {
             EditorTTDList = _tddList;
         }
+
         #endregion
 
-
         #region "Gizmos"
+
         private void OnDrawGizmosSelected()
         {
             if (isEditorMouseHittingTerrain)
@@ -1146,8 +1191,8 @@ namespace RoadArchitect
                 Gizmos.DrawCube(editorMousePos, new Vector3(10f, 4f, 10f));
             }
         }
-        #endregion
 
+        #endregion
 
         /// <summary> Returns width of road </summary>
         public float RoadWidth()
@@ -1155,10 +1200,8 @@ namespace RoadArchitect
             return (laneWidth * (float)laneAmount);
         }
 
-
-        #if UNITY_EDITOR
+#if UNITY_EDITOR
         public float EditorCameraTimer = 0f;
-
 
         private void Update()
         {
@@ -1172,10 +1215,11 @@ namespace RoadArchitect
                 }
             }
         }
-        #endif
 
+#endif
 
         #region "Default materials retrieval"
+
         public bool DetectInvalidDefaultMatsForUndo()
         {
             string lowerName = "";
@@ -1238,7 +1282,6 @@ namespace RoadArchitect
             return false;
         }
 
-
         /// <summary> Assigns materials on all mesh renderers </summary>
         public void SetAllCutsToCurrentMaterials()
         {
@@ -1269,7 +1312,6 @@ namespace RoadArchitect
             }
         }
 
-
         /// <summary> Sets materials of each MR in _MRs </summary>
         private void SetCutMaterials(MeshRenderer[] _MRs, Material[] _roadWorldMats, Material[] _roadMarkerMats)
         {
@@ -1294,7 +1336,6 @@ namespace RoadArchitect
             }
         }
 
-
         public Material[] GetRoadWorldMaterials()
         {
             List<Material> roadMaterials = new List<Material>();
@@ -1318,7 +1359,6 @@ namespace RoadArchitect
             return roadMaterials.ToArray();
         }
 
-
         public Material[] GetRoadMarkerMaterials()
         {
             List<Material> roadMarkerMaterials = new List<Material>();
@@ -1341,7 +1381,6 @@ namespace RoadArchitect
 
             return roadMarkerMaterials.ToArray();
         }
-
 
         public Material[] GetShoulderWorldMaterials()
         {
@@ -1371,7 +1410,6 @@ namespace RoadArchitect
             return shoulderMaterials.ToArray();
         }
 
-
         public Material[] GetShoulderMarkerMaterials()
         {
             if (!isShouldersEnabled)
@@ -1399,10 +1437,11 @@ namespace RoadArchitect
 
             return shoulderMarkerMaterials.ToArray();
         }
+
         #endregion
 
-
         #region "Materials"
+
         /// <summary> Loads the standard materials if the road uses default materials </summary>
         private void CheckMats()
         {
@@ -1460,7 +1499,6 @@ namespace RoadArchitect
             }
         }
 
-
         public void SetDefaultMats()
         {
             string basePath = RoadEditorUtility.GetBasePath();
@@ -1473,7 +1511,6 @@ namespace RoadArchitect
             RoadMaterialMarker2 = null;
             RoadMaterialMarker3 = null;
             RoadMaterialMarker4 = null;
-
 
             if (roadMaterialDropdown == RoadMaterialDropdownEnum.Asphalt)
             {
@@ -1501,7 +1538,6 @@ namespace RoadArchitect
                     RoadMaterialMarker2 = RoadEditorUtility.LoadMaterial(basePath + "/Materials/Markers/TireMarks.mat");
                 }
 
-
                 ShoulderMaterial1 = RoadEditorUtility.LoadMaterial(basePath + "/Materials/Shoulder1.mat");
                 ShoulderMaterial2 = RoadEditorUtility.LoadMaterial(basePath + "/Materials/Markers/RoadDetailOverlay1.mat");
 
@@ -1524,7 +1560,6 @@ namespace RoadArchitect
                 RoadMaterial1 = RoadMaterialMarker1;
             }
 
-
             if (roadMaterialDropdown == RoadMaterialDropdownEnum.Brick
             || roadMaterialDropdown == RoadMaterialDropdownEnum.Cobblestone
             || roadMaterialDropdown == RoadMaterialDropdownEnum.Dirt)
@@ -1536,7 +1571,6 @@ namespace RoadArchitect
                 }
             }
 
-
             int nodeCount = spline.GetNodeCount();
             for (int i = 0; i < nodeCount; i++)
             {
@@ -1546,8 +1580,8 @@ namespace RoadArchitect
                 }
             }
         }
-        #endregion
 
+        #endregion
 
         /// <summary> Toggles render state of every mesh of this road </summary>
         public void ToggleWireframes()
@@ -1560,11 +1594,10 @@ namespace RoadArchitect
             }
         }
 
-
         /// <summary>  Toggles render state of each mesh in _MRs through isGizmosEnabled </summary>
         private void ToggleWireframesHelper(Transform _transform)
         {
-            #if UNITY_EDITOR
+#if UNITY_EDITOR
             MeshRenderer[] _MRs = _transform.GetComponentsInChildren<MeshRenderer>();
             int meshRenderersCount = _MRs.Length;
             for (int i = 0; i < meshRenderersCount; i++)
@@ -1572,17 +1605,16 @@ namespace RoadArchitect
                 //UnityEditor.EditorUtility.SetSelectedWireframeHidden(_MRs[i], !isGizmosEnabled);
                 UnityEditor.EditorUtility.SetSelectedRenderState(_MRs[i], isGizmosEnabled ? UnityEditor.EditorSelectedRenderState.Wireframe : UnityEditor.EditorSelectedRenderState.Hidden);
             }
-            #endif
+#endif
         }
-
 
         public void DuplicateRoad()
         {
             GameObject roadObj = roadSystem.AddRoad();
 
-            #if UNITY_EDITOR
+#if UNITY_EDITOR
             UnityEditor.Undo.RegisterCreatedObjectUndo(roadObj, "Duplicate");
-            #endif
+#endif
 
             Road road = roadObj.GetComponent<Road>();
             if (road == null)
@@ -1590,7 +1622,7 @@ namespace RoadArchitect
                 return;
             }
 
-            //Road editor options: 
+            //Road editor options:
             road.laneWidth = laneWidth;
             road.isShouldersEnabled = isShouldersEnabled;
             road.shoulderWidth = shoulderWidth;
@@ -1650,19 +1682,16 @@ namespace RoadArchitect
 
             road.spline.TriggerSetup();
 
-
-            #if UNITY_EDITOR
+#if UNITY_EDITOR
             UnityEditor.Selection.activeGameObject = road.transform.gameObject;
-            #endif
+#endif
         }
-
 
         /// <summary> Sets localPosition for meshes up to prevent z fighting </summary>
         private void FixDisplay()
         {
             FixDisplayMobile();
         }
-
 
         /// <summary> Sets localPosition for meshes up to prevent z fighting </summary>
         private void FixDisplayMobile()
@@ -1699,7 +1728,6 @@ namespace RoadArchitect
                 }
             }
 
-
             //Intersections (all):
             markerObjs = roadSystem.GetComponentsInChildren<MeshRenderer>();
             foreach (MeshRenderer MR in markerObjs)
@@ -1727,7 +1755,6 @@ namespace RoadArchitect
             }
         }
 
-
         /// <summary> Sets localPosition up by 0.01 </summary>
         private void FixDisplayWin()
         {
@@ -1742,7 +1769,6 @@ namespace RoadArchitect
                     MR.transform.localPosition = vector;
                 }
             }
-
 
             //Intersections (all):
             markerObjs = FindObjectsOfType<MeshRenderer>();
