@@ -1,5 +1,6 @@
 ﻿using Unity.Profiling;
 using UnityEngine;
+using static RoadArchitect.Constants;
 
 namespace RoadArchitect
 {
@@ -12,11 +13,11 @@ namespace RoadArchitect
         {
             using (s_CreateNode.Auto())
             {
-                Object[] worldNodeCount = Object.FindObjectsOfType<SplineN>();
-                GameObject nodeObj = new GameObject("Node" + worldNodeCount.Length.ToString());
+                //Object[] worldNodeCount = Object.FindObjectsOfType<SplineN>();
+                GameObject nodeObj = new GameObject($"Node {_road.RoadNodes++}");
 
 #if UNITY_EDITOR
-                if (!_isInterNode)
+                if (ENABLE_EDITOR_FUNCS && !_isInterNode)
                 {
                     UnityEditor.Undo.RegisterCreatedObjectUndo(nodeObj, "Created node");
                 }
@@ -95,7 +96,7 @@ namespace RoadArchitect
             }
 
 #if UNITY_EDITOR
-            if (!_isInterNode)
+            if (ENABLE_EDITOR_FUNCS && !_isInterNode)
             {
                 UnityEditor.Undo.RegisterCreatedObjectUndo(nodeObj, "Inserted node");
             }

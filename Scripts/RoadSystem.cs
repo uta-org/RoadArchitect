@@ -1,5 +1,7 @@
 #region "Imports"
 using UnityEngine;
+using static RoadArchitect.Constants;
+
 #endregion
 
 
@@ -28,9 +30,12 @@ namespace RoadArchitect
             //Road:
             GameObject roadObj = new GameObject("Road" + newRoadNumber.ToString());
 
-            #if UNITY_EDITOR
-            UnityEditor.Undo.RegisterCreatedObjectUndo(roadObj, "Created road");
-            #endif
+            if (ENABLE_EDITOR_FUNCS)
+            {
+#if UNITY_EDITOR
+                UnityEditor.Undo.RegisterCreatedObjectUndo(roadObj, "Created road");
+#endif
+            }
 
             roadObj.transform.parent = transform;
             Road road = roadObj.AddComponent<Road>();
@@ -47,12 +52,15 @@ namespace RoadArchitect
 
             road.ResetTerrainHistory();
 
-            #if UNITY_EDITOR
-            if (_isForceSelected)
+            if (ENABLE_EDITOR_FUNCS)
             {
-                UnityEditor.Selection.activeGameObject = roadObj;
+#if UNITY_EDITOR
+                if (_isForceSelected)
+                {
+                    UnityEditor.Selection.activeGameObject = roadObj;
+                }
+#endif
             }
-            #endif
 
             return roadObj;
         }

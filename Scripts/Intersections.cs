@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
+using static RoadArchitect.Constants;
 
 
 namespace RoadArchitect
@@ -227,9 +228,12 @@ namespace RoadArchitect
                 }
             }
 
-            #if UNITY_EDITOR
-            UnityEditor.Undo.RegisterCreatedObjectUndo(intersectionObject, "Created intersection");
-            #endif
+            if (ENABLE_EDITOR_FUNCS)
+            {
+#if UNITY_EDITOR
+                UnityEditor.Undo.RegisterCreatedObjectUndo(intersectionObject, "Created intersection");
+#endif
+            }
 
             roadIntersection.Setup(tNode1, tNode2);
             intersectionObject.transform.position = _node1.transform.position;

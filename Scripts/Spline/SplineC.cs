@@ -3,6 +3,7 @@
 using UnityEngine;
 using System.Collections.Generic;
 using Unity.Profiling;
+using static RoadArchitect.Constants;
 
 #endregion
 
@@ -466,7 +467,7 @@ namespace RoadArchitect
 
             roadLengthOriginal = roadLength;
             roadLength = roadLength * 1.05f;
-            var step = Mathf.Min(0.5f / roadLength, 0.01f);
+            var step = Mathf.Max(0.5f / roadLength, STEP_MIN);
 
             //Get a slightly more accurate portrayal of the time:
             var nodeTime = 0f;
@@ -505,7 +506,7 @@ namespace RoadArchitect
 
             //Now get fine distance between nodes:
             var newTotalDistance = 0f;
-            step = Mathf.Min(0.5f / distance, 0.01f);
+            step = Mathf.Max(0.5f / distance, STEP_MIN);
             SplineN prevNode = null;
             SplineN currentNode = null;
             prevPos = GetSplineValue(0f, false);
@@ -599,7 +600,7 @@ namespace RoadArchitect
         private void RoadDefCalcs()
         {
             var tMod = Mathf.Lerp(0.05f, 0.2f, distance / 9000f);
-            var step = Mathf.Min(tMod / distance, 0.01f);
+            var step = Mathf.Max(tMod / distance, STEP_MIN);
             var currentPos = GetSplineValue(0f);
             var prevPos = currentPos;
             var tempDistanceModMax = road.roadDefinition - step;
@@ -2020,9 +2021,13 @@ namespace RoadArchitect
             //Don't allow connection with less than 3 nodes:
             if (mCount < 3 || nodeCount < 3)
             {
+                if (ENABLE_EDITOR_FUNCS)
+                {
 #if UNITY_EDITOR
-                UnityEditor.EditorUtility.DisplayDialog("Cannot connect roads", "Roads must have at least 3 nodes to be connected.", "ok");
+                    UnityEditor.EditorUtility.DisplayDialog("Cannot connect roads",
+                        "Roads must have at least 3 nodes to be connected.", "ok");
 #endif
+                }
 
                 return;
             }
@@ -2236,9 +2241,13 @@ namespace RoadArchitect
             previewSpline.isDrawingGizmos = false;
             spline.previewSpline.isDrawingGizmos = false;
 
+            if (ENABLE_EDITOR_FUNCS)
+            {
+
 #if UNITY_EDITOR
-            UnityEditor.SceneView.RepaintAll();
+                UnityEditor.SceneView.RepaintAll();
 #endif
+            }
         }
 
         #endregion

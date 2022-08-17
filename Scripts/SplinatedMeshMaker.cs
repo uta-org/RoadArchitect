@@ -3,6 +3,8 @@ using UnityEngine;
 using System.Collections.Generic;
 using System.IO;
 using RoadArchitect;
+using static RoadArchitect.Constants;
+
 #endregion
 
 
@@ -829,31 +831,39 @@ namespace RoadArchitect.Splination
                 _SMM.SplinatedMaterial1String = SplinatedMaterial1String;
                 _SMM.SplinatedMaterial2String = SplinatedMaterial2String;
 
-
-
-                #if UNITY_EDITOR
-                _SMM.currentSplination = UnityEditor.AssetDatabase.LoadAssetAtPath<GameObject>(CurrentSplinationString);
-                if (CurrentSplinationCap1String != null && CurrentSplinationCap1String.Length > 1)
+                if (ENABLE_EDITOR_FUNCS)
                 {
-                    _SMM.currentSplinationCap1 = UnityEditor.AssetDatabase.LoadAssetAtPath<GameObject>(CurrentSplinationCap1String);
-                }
-                if (CurrentSplinationCap2String != null && CurrentSplinationCap2String.Length > 1)
-                {
-                    _SMM.currentSplinationCap2 = UnityEditor.AssetDatabase.LoadAssetAtPath<GameObject>(CurrentSplinationCap2String);
-                }
-                if (isMaterialOverriden)
-                {
-                    if (SplinatedMaterial1String != null && SplinatedMaterial1String.Length > 0)
+#if UNITY_EDITOR
+                    _SMM.currentSplination =
+                        UnityEditor.AssetDatabase.LoadAssetAtPath<GameObject>(CurrentSplinationString);
+                    if (CurrentSplinationCap1String != null && CurrentSplinationCap1String.Length > 1)
                     {
-                        _SMM.SplinatedMaterial1 = UnityEditor.AssetDatabase.LoadAssetAtPath<Material>(SplinatedMaterial1String);
+                        _SMM.currentSplinationCap1 =
+                            UnityEditor.AssetDatabase.LoadAssetAtPath<GameObject>(CurrentSplinationCap1String);
                     }
-                    if (SplinatedMaterial2String != null && SplinatedMaterial2String.Length > 0)
-                    {
-                        _SMM.SplinatedMaterial2 = UnityEditor.AssetDatabase.LoadAssetAtPath<Material>(SplinatedMaterial2String);
-                    }
-                }
-                #endif
 
+                    if (CurrentSplinationCap2String != null && CurrentSplinationCap2String.Length > 1)
+                    {
+                        _SMM.currentSplinationCap2 =
+                            UnityEditor.AssetDatabase.LoadAssetAtPath<GameObject>(CurrentSplinationCap2String);
+                    }
+
+                    if (isMaterialOverriden)
+                    {
+                        if (SplinatedMaterial1String != null && SplinatedMaterial1String.Length > 0)
+                        {
+                            _SMM.SplinatedMaterial1 =
+                                UnityEditor.AssetDatabase.LoadAssetAtPath<Material>(SplinatedMaterial1String);
+                        }
+
+                        if (SplinatedMaterial2String != null && SplinatedMaterial2String.Length > 0)
+                        {
+                            _SMM.SplinatedMaterial2 =
+                                UnityEditor.AssetDatabase.LoadAssetAtPath<Material>(SplinatedMaterial2String);
+                        }
+                    }
+#endif
+                }
 
                 _SMM.isDefault = isDefault;
                 _SMM.isExactSplination = isExactSplination;
@@ -911,16 +921,20 @@ namespace RoadArchitect.Splination
                 _SMM.EndCapStartString = EndCapStartString;
                 _SMM.EndCapEndString = EndCapEndString;
 
-                #if UNITY_EDITOR
-                if (EndCapStartString != null && EndCapStartString.Length > 0)
+                if (ENABLE_EDITOR_FUNCS)
                 {
-                    _SMM.EndCapStart = UnityEditor.AssetDatabase.LoadAssetAtPath<GameObject>(EndCapStartString);
+#if UNITY_EDITOR
+                    if (EndCapStartString != null && EndCapStartString.Length > 0)
+                    {
+                        _SMM.EndCapStart = UnityEditor.AssetDatabase.LoadAssetAtPath<GameObject>(EndCapStartString);
+                    }
+
+                    if (EndCapEndString != null && EndCapEndString.Length > 0)
+                    {
+                        _SMM.EndCapEnd = UnityEditor.AssetDatabase.LoadAssetAtPath<GameObject>(EndCapEndString);
+                    }
+#endif
                 }
-                if (EndCapEndString != null && EndCapEndString.Length > 0)
-                {
-                    _SMM.EndCapEnd = UnityEditor.AssetDatabase.LoadAssetAtPath<GameObject>(EndCapEndString);
-                }
-                #endif
 
                 _SMM.isEndCapCustomMatchStart = isEndCapCustomMatchStart;
                 _SMM.EndCapCustomOffsetStart = EndCapCustomOffsetStart;
@@ -1402,16 +1416,20 @@ namespace RoadArchitect.Splination
                     EndCapEndString = RootUtils.GetPrefabString(EndCapEnd);
                 }
 
-                #if UNITY_EDITOR
-                if (SplinatedMaterial1 != null)
+                if (ENABLE_EDITOR_FUNCS)
                 {
-                    SplinatedMaterial1String = UnityEditor.AssetDatabase.GetAssetPath(SplinatedMaterial1);
+#if UNITY_EDITOR
+                    if (SplinatedMaterial1 != null)
+                    {
+                        SplinatedMaterial1String = UnityEditor.AssetDatabase.GetAssetPath(SplinatedMaterial1);
+                    }
+
+                    if (SplinatedMaterial2 != null)
+                    {
+                        SplinatedMaterial2String = UnityEditor.AssetDatabase.GetAssetPath(SplinatedMaterial2);
+                    }
+#endif
                 }
-                if (SplinatedMaterial2 != null)
-                {
-                    SplinatedMaterial2String = UnityEditor.AssetDatabase.GetAssetPath(SplinatedMaterial2);
-                }
-                #endif
             }
 
             if (currentSplination == null)
@@ -3332,15 +3350,17 @@ namespace RoadArchitect.Splination
                 System.IO.Directory.CreateDirectory(savingPath);
             }
 
-
-            #if UNITY_EDITOR
-            // Unity works with forward slash so we convert
-            // If you want to implement your own Asset creation and saving you should just use finalName
-            finalName = finalName.Replace(Path.DirectorySeparatorChar, '/');
-            finalName = finalName.Replace(Path.AltDirectorySeparatorChar, '/');
-            UnityEditor.AssetDatabase.CreateAsset(_mesh, finalName);
-            UnityEditor.AssetDatabase.SaveAssets();
-            #endif
+            if (ENABLE_EDITOR_FUNCS)
+            {
+#if UNITY_EDITOR
+                // Unity works with forward slash so we convert
+                // If you want to implement your own Asset creation and saving you should just use finalName
+                finalName = finalName.Replace(Path.DirectorySeparatorChar, '/');
+                finalName = finalName.Replace(Path.AltDirectorySeparatorChar, '/');
+                UnityEditor.AssetDatabase.CreateAsset(_mesh, finalName);
+                UnityEditor.AssetDatabase.SaveAssets();
+#endif
+            }
         }
 
 

@@ -4,6 +4,8 @@ using System.Xml;
 using System.Xml.Serialization;
 using System.IO;
 using System.Text;
+using static RoadArchitect.Constants;
+
 #endregion
 
 
@@ -81,22 +83,26 @@ namespace RoadArchitect
         public static string GetPrefabString(GameObject _object)
         {
             string path = "";
-            #if UNITY_EDITOR
-            if (_object != null)
+            if (ENABLE_EDITOR_FUNCS)
             {
-                path = UnityEditor.AssetDatabase.GetAssetPath(_object);
-                if (path == null || path.Length < 1)
+#if UNITY_EDITOR
+                if (_object != null)
                 {
-                    Object parentObject;
-                    #if UNITY_2018_2_OR_NEWER
-                    parentObject = UnityEditor.PrefabUtility.GetCorrespondingObjectFromSource(_object);
-                    #else
+                    path = UnityEditor.AssetDatabase.GetAssetPath(_object);
+                    if (path == null || path.Length < 1)
+                    {
+                        Object parentObject;
+#if UNITY_2018_2_OR_NEWER
+                        parentObject = UnityEditor.PrefabUtility.GetCorrespondingObjectFromSource(_object);
+#else
                     parentObject = UnityEditor.PrefabUtility.GetPrefabParent(_object);
-                    #endif
-                    path = UnityEditor.AssetDatabase.GetAssetPath(parentObject);
+#endif
+                        path = UnityEditor.AssetDatabase.GetAssetPath(parentObject);
+                    }
                 }
+#endif
             }
-            #endif
+
             return path;
         }
 
@@ -375,6 +381,8 @@ namespace RoadArchitect
         /// <summary> Force Unity to free memory </summary>
         public static void ForceCollection(bool _isWait = false)
         {
+            if (!ENABLE_EDITOR_FUNCS) return;
+
             #if UNITY_EDITOR
             System.GC.Collect();
             if (_isWait)
